@@ -338,3 +338,59 @@ body.locked #hub-footer { display: none; }
 .gate-secondary { background: var(--green-soft); color: var(--green-deep); }
 .gate-box button:disabled { opacity: .6; cursor: default; }
 .gate-err { min-height: 18px; margin-top: 12px; font-size: 14px; color: #d24b3a; font-weight: 600; }
+
+/* ── 마이페이지 ── */
+#mypage-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(44, 51, 42, .45);
+  padding: 20px;
+  overflow: auto;
+}
+.mypage-card {
+  width: min(92vw, 400px);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 50px rgba(30, 50, 25, .25);
+  padding: 26px 28px 28px;
+}
+.mypage-head { display: flex; align-items: center; justify-content: space-between; }
+.mypage-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+.mypage-x {
+  font-family: inherit; font-size: 18px; color: var(--muted);
+  background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 8px;
+}
+.mypage-x:hover { background: #f1f4ee; }
+.mypage-email { font-size: 14px; color: var(--muted); margin: 2px 0 18px; }
+
+#mp-form { display: flex; flex-direction: column; }
+#mp-form label { font-size: 13px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+#mp-form input, #mp-form select {
+  font-family: inherit; font-size: 16px; padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: 12px; outline: none;
+  background: #fff; color: var(--ink); width: 100%;
+}
+#mp-form input:focus, #mp-form select:focus { border-color: var(--green); }
+.mypage-save {
+  margin-top: 18px; font-family: inherit; font-size: 16px; font-weight: 700;
+  color: #fff; background: var(--green); border: none; border-radius: 12px; padding: 13px; cursor: pointer;
+}
+.mypage-save:hover { background: var(--green-deep); }
+.mypage-save:disabled { opacity: .6; cursor: default; }
+
+.mypage-divider { height: 1px; background: var(--line); margin: 20px 0 14px; }
+.mypage-logout {
+  width: 100%; font-family: inherit; font-size: 15px; font-weight: 700;
+  color: var(--ink); background: #f1f4ee; border: none; border-radius: 12px; padding: 12px; cursor: pointer;
+}
+.mypage-logout:hover { background: #e8ede2; }
+.mypage-delete {
+  width: 100%; margin-top: 10px; font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #c0402f; background: none; border: none; cursor: pointer; padding: 8px;
+}
+.mypage-delete:hover { text-decoration: underline; }
+.mypage-err { min-height: 18px; margin-top: 6px; font-size: 14px; color: #d24b3a; font-weight: 600; text-align: center; }

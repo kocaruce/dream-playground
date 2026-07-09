@@ -33,10 +33,8 @@
     if (chip) {
       const name = (profile && profile.name) || (user.email ? user.email.split("@")[0] : "선생님");
       chip.innerHTML = `<span class="dot"></span>${name} 선생님`;
-      chip.title = "눌러서 로그아웃";
-      chip.onclick = async () => {
-        if (confirm("로그아웃할까요?")) { await window.signOutUser(); location.reload(); }
-      };
+      chip.title = "마이페이지";
+      chip.onclick = () => { if (window.openMyPage) window.openMyPage(); };
     }
   }
 

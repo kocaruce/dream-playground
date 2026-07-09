@@ -1,4 +1,4 @@
-// 꿈 놀이터 로그인/가입 (Firebase Auth + 프로필 저장).
+// 꿈 놀이터 로그인/가입 (Firebase Auth + 프로필 저장/수정/탈퇴).
 // 구글 · 이메일 로그인. 처음 로그인하면 선생님 프로필을 받아 users/{uid} 에 저장.
 // 카페 키오스크와 같은 Firebase 프로젝트 + 같은 주소라 로그인 세션이 공유됩니다.
 
@@ -6,9 +6,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signInWithPopup, GoogleAuthProvider
+  signInWithPopup, GoogleAuthProvider,
+  deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const cfg = window.FIREBASE_CONFIG || {};
 const configured = cfg.apiKey && !String(cfg.apiKey).startsWith("여기에");
@@ -28,6 +29,8 @@ if (configured) {
 
 window.AUTH_ENABLED = !!auth;
 window.watchAuth = (cb) => { if (auth) onAuthStateChanged(auth, cb); };
+window.getCurrentUser = () => auth && auth.currentUser;
+window.providerId = () => (auth && auth.currentUser && auth.currentUser.providerData[0] && auth.currentUser.providerData[0].providerId) || "";
 
 window.signInEmail = (email, pw) => signInWithEmailAndPassword(auth, email, pw);
 window.signUpEmail = (email, pw) => createUserWithEmailAndPassword(auth, email, pw);
@@ -40,6 +43,19 @@ window.getProfile = async (uid) => {
   return snap.exists() ? snap.val() : null;
 };
 window.saveProfile = (uid, data) => set(ref(db, "users/" + uid), data);
+
+// ── 회원 탈퇴 ──
+// 프로필을 지운 뒤 계정을 삭제. 오래 로그인한 경우 requires-recent-login 가 날 수 있음.
+window.deleteAccount = async () => {
+  const user = auth.currentUser;
+  await remove(ref(db, "users/" + user.uid));
+  await deleteUser(user);
+};
+// 재인증 후 계정만 삭제 (프로필은 위에서 이미 삭제됨)
+window.reauthGoogle = () => reauthenticateWithPopup(auth.currentUser, new GoogleAuthProvider());
+window.reauthEmail = (pw) => reauthenticateWithCredential(
+  auth.currentUser, EmailAuthProvider.credential(auth.currentUser.email, pw));
+window.deleteUserOnly = () => deleteUser(auth.currentUser);
 
 window.AUTH_READY = true;
 window.dispatchEvent(new Event("auth-ready"));
