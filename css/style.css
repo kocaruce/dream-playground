@@ -250,3 +250,58 @@ body {
   box-shadow: 0 10px 26px rgba(46, 125, 51, .32);
   z-index: 20;
 }
+
+/* ── 로그인 잠금 ── */
+body.locked #hub-header,
+body.locked #hub,
+body.locked #hub-footer { display: none; }
+
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+#login-box {
+  width: min(92vw, 400px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 38px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+.login-brand { font-size: 22px; font-weight: 800; color: var(--green-deep); margin-bottom: 4px; }
+#login-box h2 { font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+#login-box .login-sub { font-size: 15px; color: var(--muted); margin-bottom: 8px; }
+#login-box input {
+  font-family: inherit;
+  font-size: 16px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: none;
+}
+#login-box input:focus { border-color: var(--green); }
+#login-box button {
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--green);
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+#login-box button:hover { background: var(--green-deep); }
+#login-box button:disabled { opacity: .6; cursor: default; }
+#login-box .login-err { min-height: 20px; font-size: 14px; color: #d24b3a; font-weight: 600; }
