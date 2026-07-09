@@ -251,12 +251,12 @@ body {
   z-index: 20;
 }
 
-/* ── 로그인 잠금 ── */
+/* ── 로그인/가입 잠금 ── */
 body.locked #hub-header,
 body.locked #hub,
 body.locked #hub-footer { display: none; }
 
-#login-overlay {
+#gate-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -265,43 +265,76 @@ body.locked #hub-footer { display: none; }
   justify-content: center;
   background: var(--bg);
   padding: 20px;
+  overflow: auto;
 }
-#login-box {
+.gate-box {
   width: min(92vw, 400px);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 38px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 36px 32px;
   text-align: center;
 }
-.login-brand { font-size: 22px; font-weight: 800; color: var(--green-deep); margin-bottom: 4px; }
-#login-box h2 { font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
-#login-box .login-sub { font-size: 15px; color: var(--muted); margin-bottom: 8px; }
-#login-box input {
+.gate-brand { font-size: 22px; font-weight: 800; color: var(--green-deep); margin-bottom: 6px; }
+.gate-box h2 { font-size: 23px; font-weight: 800; letter-spacing: -.5px; }
+.gate-sub { font-size: 15px; color: var(--muted); margin: 6px 0 20px; }
+
+.gate-box form { display: flex; flex-direction: column; gap: 10px; }
+.gate-box input,
+.gate-box select {
   font-family: inherit;
   font-size: 16px;
   padding: 13px 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
   outline: none;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
 }
-#login-box input:focus { border-color: var(--green); }
-#login-box button {
+.gate-box input:focus,
+.gate-box select:focus { border-color: var(--green); }
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
   font-family: inherit;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  background: var(--green);
-  border: none;
-  border-radius: 12px;
   padding: 13px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
   cursor: pointer;
-  margin-top: 2px;
 }
-#login-box button:hover { background: var(--green-deep); }
-#login-box button:disabled { opacity: .6; cursor: default; }
-#login-box .login-err { min-height: 20px; font-size: 14px; color: #d24b3a; font-weight: 600; }
+.social-btn:hover { border-color: #d8e3cc; background: #FBFCF9; }
+.social-btn .g {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; color: #4285F4; border: 1px solid #e6e6e6;
+  font-weight: 800; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;
+}
+
+.gate-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: 13px; }
+.gate-divider::before, .gate-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.gate-row { display: flex; gap: 8px; }
+.gate-primary, .gate-secondary {
+  flex: 1;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+.gate-primary { background: var(--green); color: #fff; }
+.gate-primary:hover { background: var(--green-deep); }
+.gate-secondary { background: var(--green-soft); color: var(--green-deep); }
+.gate-box button:disabled { opacity: .6; cursor: default; }
+.gate-err { min-height: 18px; margin-top: 12px; font-size: 14px; color: #d24b3a; font-weight: 600; }
