@@ -191,6 +191,22 @@ body {
 
 .btn-kakao { background: #FEE500; color: #3A2E1E; font-size: 16px; padding: 13px 26px; }
 .btn-kakao:hover { background: #FADA00; }
+.btn-record {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-size: 15px;
+  padding: 11px;
+  font-family: inherit;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-record:hover { background: #dcefd0; }
+.btn-record:disabled { opacity: .7; cursor: default; }
 
 .accounts { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
 .acct {

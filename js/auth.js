@@ -9,7 +9,12 @@ import {
   signInWithPopup, GoogleAuthProvider,
   deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// 관리자(99p) uid — 회원 목록·후원 기록 열람 권한
+const ADMIN_UID = "qoYHZGbPCqShikrQJ6UbfBKSVPT2";
+window.ADMIN_UID = ADMIN_UID;
+window.isAdmin = () => !!(auth && auth.currentUser && auth.currentUser.uid === ADMIN_UID);
 
 const cfg = window.FIREBASE_CONFIG || {};
 const configured = cfg.apiKey && !String(cfg.apiKey).startsWith("여기에");
@@ -56,6 +61,23 @@ window.reauthGoogle = () => reauthenticateWithPopup(auth.currentUser, new Google
 window.reauthEmail = (pw) => reauthenticateWithCredential(
   auth.currentUser, EmailAuthProvider.credential(auth.currentUser.email, pw));
 window.deleteUserOnly = () => deleteUser(auth.currentUser);
+
+// ── 후원 자기기록 ── (로그인한 선생님이 후원했음을 스스로 기록)
+window.recordDonation = (data) => push(ref(db, "donations"), data);
+
+// ── 관리자 조회 ── (규칙상 관리자만 성공)
+window.adminGetUsers = async () => {
+  const snap = await get(ref(db, "users"));
+  const list = [];
+  snap.forEach(c => list.push({ uid: c.key, ...c.val() }));
+  return list;
+};
+window.adminGetDonations = async () => {
+  const snap = await get(ref(db, "donations"));
+  const list = [];
+  snap.forEach(c => list.push({ id: c.key, ...c.val() }));
+  return list;
+};
 
 window.AUTH_READY = true;
 window.dispatchEvent(new Event("auth-ready"));

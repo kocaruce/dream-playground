@@ -1,0 +1,52 @@
+/* 관리자 화면 */
+body.admin { background: var(--bg); }
+.admin-tag {
+  font-size: 13px; font-weight: 700; color: #fff; background: var(--green);
+  padding: 3px 10px; border-radius: 12px; vertical-align: middle; margin-left: 6px;
+}
+
+#admin-main { max-width: 1080px; margin: 0 auto; padding: 24px 28px 70px; }
+
+.admin-note {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 40px 28px; text-align: center;
+  font-size: 17px; color: var(--muted); margin-top: 30px;
+}
+.admin-note.err { color: #c0402f; }
+
+.admin-login { max-width: 320px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.admin-login p { color: var(--ink); font-weight: 700; margin-bottom: 4px; }
+.admin-login input {
+  font-family: inherit; font-size: 16px; padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: 12px; outline: none; width: 100%;
+}
+.admin-login input:focus { border-color: var(--green); }
+.admin-login .gate-primary { width: 100%; }
+
+/* 통계 카드 */
+.admin-cards { display: flex; gap: 14px; margin: 8px 0 26px; flex-wrap: wrap; }
+.stat {
+  flex: 1; min-width: 150px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: var(--shadow); padding: 18px 22px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-label { font-size: 14px; color: var(--muted); font-weight: 600; }
+.stat-num { font-size: 34px; font-weight: 800; color: var(--green-deep); letter-spacing: -1px; }
+
+.admin-h2 { font-size: 20px; font-weight: 800; letter-spacing: -.5px; margin: 26px 4px 12px; }
+.admin-h2 span { font-size: 15px; color: var(--muted); font-weight: 600; }
+
+.table-wrap {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 640px; }
+thead th {
+  text-align: left; font-size: 13px; font-weight: 700; color: var(--muted);
+  padding: 14px 16px; border-bottom: 1px solid var(--line); background: #FBFCF9; white-space: nowrap;
+}
+tbody td { padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--ink); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #FBFCF9; }
+td.mono { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; white-space: nowrap; }
+td.empty { text-align: center; color: var(--muted); padding: 40px 0; }
