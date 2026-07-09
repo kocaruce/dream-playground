@@ -1,0 +1,252 @@
+/* 꿈 놀이터 — 전문적인 뼈대 + 아이들의 순수함
+   Pretendard 폰트, 정돈된 그리드, 부드러운 그림자의 흰 카드 */
+:root {
+  --bg: #F6FAF1;
+  --surface: #FFFFFF;
+  --green: #43A047;
+  --green-deep: #2E7D33;
+  --green-soft: #EAF5E4;
+  --coral: #F08A5D;
+  --coral-deep: #DB6B3C;
+  --ink: #2C332A;
+  --muted: #6E7A69;
+  --line: #E8EFE1;
+  --shadow: 0 8px 28px rgba(60, 100, 55, .08);
+  --shadow-hover: 0 14px 36px rgba(60, 100, 55, .14);
+  --radius: 20px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  line-height: 1.5;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: transform .12s, box-shadow .15s, background .15s;
+}
+.btn:active { transform: scale(.96); }
+
+/* ── 헤더 ── */
+#hub-header {
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { font-size: 24px; font-weight: 800; color: var(--green-deep); letter-spacing: -.5px; }
+.brand-mark { margin-right: 2px; }
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green-deep);
+  background: var(--green-soft);
+  border: none;
+  border-radius: 22px;
+  padding: 9px 18px;
+  cursor: pointer;
+}
+.account .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+/* ── 본문 ── */
+#hub { max-width: 1080px; margin: 0 auto; padding: 0 28px 70px; }
+
+.hero { text-align: center; padding: 62px 10px 54px; }
+.hero-badge {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green-deep);
+  background: var(--green-soft);
+  padding: 7px 16px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.hero p {
+  margin: 20px auto 0;
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ── 섹션 헤더 ── */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 8px 4px 20px;
+}
+.section-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+.section-head .count { font-size: 14px; color: var(--muted); font-weight: 600; }
+
+/* ── 도구 카드 (이미지 상단형) ── */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 22px;
+}
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .16s, box-shadow .16s;
+  display: flex;
+  flex-direction: column;
+}
+.tool-card:not(.soon):hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+
+.tool-banner {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.banner-cafe { background: var(--green-soft); }
+.banner-sign { width: 82%; max-height: 70%; object-fit: contain; }
+.banner-soon { font-size: 52px; }
+.banner-soon span { opacity: .8; }
+.banner-a { background: #FBF3DC; }
+.banner-b { background: #F3EEFA; }
+
+.tool-body { padding: 20px 22px 24px; flex: 1; display: flex; flex-direction: column; }
+.tool-tag {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green-deep);
+  background: var(--green-soft);
+  padding: 4px 11px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.tag-soon { color: var(--muted); background: #EFEFEA; }
+.tool-body h3 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+.tool-body p { margin-top: 7px; font-size: 15px; line-height: 1.6; color: var(--muted); flex: 1; }
+.tool-actions { display: flex; gap: 9px; margin-top: 18px; }
+.btn-primary { background: var(--green); color: #fff; }
+.btn-primary:hover { background: var(--green-deep); }
+.btn-ghost { background: var(--green-soft); color: var(--green-deep); }
+.tool-card.soon { opacity: .72; }
+
+/* ── 후원 ── */
+.support { margin-top: 40px; }
+.support-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 30px 32px;
+  display: flex;
+  gap: 34px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.support-left { flex: 1; min-width: 280px; }
+.support-head { display: flex; align-items: center; gap: 10px; }
+.support-head .cup {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: #FDEEE4; display: inline-flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.support-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: var(--coral-deep); }
+.support-left > p { margin: 14px 0 18px; font-size: 15px; line-height: 1.7; color: var(--muted); }
+
+.btn-kakao { background: #FEE500; color: #3A2E1E; font-size: 16px; padding: 13px 26px; }
+.btn-kakao:hover { background: #FADA00; }
+
+.accounts { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
+.acct {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  background: #FBFBF8;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.acct:hover { border-color: #d8e3cc; }
+.acct .bank { color: var(--muted); font-weight: 700; }
+.acct i { margin-left: auto; font-style: normal; font-size: 13px; color: var(--coral-deep); font-weight: 700; }
+.acct-name { text-align: right; font-size: 13px; color: #a7b0a0; padding-right: 2px; }
+
+.support-qr {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: #FBFBF8;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.support-qr img { display: block; border-radius: 8px; }
+.support-qr span { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* ── 푸터 ── */
+#hub-footer {
+  text-align: center;
+  padding: 30px;
+  font-size: 14px;
+  color: #a7b0a0;
+  font-weight: 600;
+}
+#hub-footer .sep { margin: 0 8px; }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  background: var(--green-deep);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 13px 26px;
+  border-radius: 26px;
+  box-shadow: 0 10px 26px rgba(46, 125, 51, .32);
+  z-index: 20;
+}
