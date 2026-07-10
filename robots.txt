@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /cafe-kiosk/pos.html
+Disallow: /cafe-kiosk/history.html
+
+Sitemap: https://rollplayground.com/sitemap.xml
