@@ -375,6 +375,18 @@ body.locked #hub-footer { display: none; }
 .gate-box button:disabled { opacity: .6; cursor: default; }
 .gate-err { min-height: 18px; margin-top: 12px; font-size: 14px; color: #d24b3a; font-weight: 600; }
 .gate-err.gate-ok { color: var(--green-deep); }
+.gate-inapp {
+  background: #FEF6E6;
+  border: 1px solid #F3D998;
+  border-radius: 12px;
+  padding: 13px 15px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #7a5a13;
+  text-align: left;
+  margin-bottom: 4px;
+}
+.gate-inapp b { color: #5a3d00; }
 .gate-link {
   display: block;
   width: 100%;

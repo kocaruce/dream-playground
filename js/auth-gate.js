@@ -38,18 +38,29 @@
     }
   }
 
+  // 카카오톡·인스타 등 '앱 속 브라우저' 감지 (구글이 로그인을 차단하는 환경)
+  function inAppBrowser() {
+    const ua = navigator.userAgent || "";
+    return /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|DaumApps|everytimeApp|; wv\)/i.test(ua);
+  }
+
   // ── 로그인 / 가입 화면 ──
   function showLogin() {
     body.classList.add("locked");
+    const isInApp = inAppBrowser();
+    const googleBlock = isInApp
+      ? `<div class="gate-inapp">📱 지금 앱 속 브라우저로 열려 있어요. <b>구글 로그인은 Chrome·Safari에서만</b> 돼요. 아래 <b>이메일</b>로 로그인하시거나, 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>를 눌러주세요.</div>
+         <div class="gate-divider"><span>이메일로 로그인</span></div>`
+      : `<button type="button" class="social-btn google" id="google-btn">
+           <span class="g">G</span> 구글로 계속하기
+         </button>
+         <div class="gate-divider"><span>또는 이메일</span></div>`;
     const ov = showOverlay(`
       <div class="gate-box">
         <div class="gate-brand"><span>🌈</span> 꿈 놀이터</div>
         <h2>선생님 로그인</h2>
         <p class="gate-sub">로그인하면 놀이 도구를 이용할 수 있어요.</p>
-        <button type="button" class="social-btn google" id="google-btn">
-          <span class="g">G</span> 구글로 계속하기
-        </button>
-        <div class="gate-divider"><span>또는 이메일</span></div>
+        ${googleBlock}
         <form id="email-form" autocomplete="on">
           <input id="g-email" type="email" placeholder="이메일" autocomplete="username" required>
           <input id="g-pw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password" required>
@@ -66,7 +77,8 @@
     const setErr = (m, ok) => { err.textContent = m; err.classList.toggle("gate-ok", !!ok); };
     const busy = (b) => ov.querySelectorAll("button,input").forEach(e => e.disabled = b);
 
-    ov.querySelector("#google-btn").onclick = async () => {
+    const gbtn = ov.querySelector("#google-btn");
+    if (gbtn) gbtn.onclick = async () => {
       setErr(""); busy(true);
       try { await window.signInGoogle(); }
       catch (e) { busy(false); setErr(googleErr(e)); }
