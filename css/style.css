@@ -228,6 +228,7 @@ body {
 .btn-record:hover { background: #dcefd0; }
 .btn-record:disabled { opacity: .7; cursor: default; }
 
+.support-note { margin-top: 14px; font-size: 12.5px; line-height: 1.6; color: #a7b0a0; max-width: 380px; }
 .accounts { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
 .acct {
   font-family: inherit;
@@ -271,6 +272,9 @@ body {
   font-weight: 600;
 }
 #hub-footer .sep { margin: 0 8px; }
+#hub-footer .footer-links { margin-top: 10px; font-size: 13.5px; }
+#hub-footer .footer-links a { color: var(--green-deep); text-decoration: none; font-weight: 700; }
+#hub-footer .footer-links a:hover { text-decoration: underline; }
 
 #toast {
   position: fixed;

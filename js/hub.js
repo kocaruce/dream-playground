@@ -29,16 +29,11 @@ if (recordBtn) {
     const user = window.getCurrentUser && window.getCurrentUser();
     if (!user || !window.recordDonation) { showToast("로그인 후 이용해 주세요"); return; }
     recordBtn.disabled = true;
-    let profile = {};
-    try { profile = (await window.getProfile(user.uid)) || {}; } catch (e) {}
     try {
+      // 개인정보 최소화: 식별자(uid)·시각·방법만 저장. 이름·이메일 등은 저장하지 않고
+      // 관리자 화면에서 회원 정보와 조인해 표시한다. 탈퇴 시 users/{uid} 삭제로 자동 비식별.
       await window.recordDonation({
         uid: user.uid,
-        name: profile.name || (user.email ? user.email.split("@")[0] : "선생님"),
-        orgName: profile.orgName || "",
-        region: profile.region || "",
-        affiliation: profile.affiliation || "",
-        email: user.email || "",
         at: Date.now(),
         method: "kakaopay",
       });

@@ -164,6 +164,21 @@ async function loadAdmin() {
   document.getElementById("admin-gate").hidden = true;
   document.getElementById("admin-content").hidden = false;
 
+  // 후원 기록은 개인정보를 담지 않으므로(uid만), 회원 정보와 조인해 표시용 필드를 채운다.
+  // 탈퇴한 회원(users에 없음)은 개인을 식별할 수 없어 "(탈퇴 회원)"으로 표시된다.
+  const uMap = {};
+  allUsers.forEach(u => { uMap[u.uid] = u; });
+  allDons = allDons.map(d => {
+    const u = uMap[d.uid] || {};
+    return {
+      ...d,
+      name: u.name || d.name || "(탈퇴 회원)",
+      affiliation: u.affiliation || d.affiliation || "",
+      orgName: u.orgName || d.orgName || "",
+      region: u.region || d.region || "",
+    };
+  });
+
   allUsers.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   allDons.sort((a, b) => (b.at || 0) - (a.at || 0));
 
