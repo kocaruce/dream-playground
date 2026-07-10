@@ -162,6 +162,12 @@ body {
 .tool-body h3 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
 .tool-body p { margin-top: 7px; font-size: 15px; line-height: 1.6; color: var(--muted); flex: 1; }
 .tool-actions { display: flex; gap: 9px; margin-top: 18px; }
+.tool-actions .btn {
+  flex: 1;               /* 카드 폭을 균등하게 나눠 갖고 */
+  white-space: nowrap;   /* 라벨은 절대 줄바꿈되지 않게 */
+  padding: 12px 8px;
+  text-align: center;
+}
 .btn-primary { background: var(--green); color: #fff; }
 .btn-primary:hover { background: var(--green-deep); }
 .btn-ghost { background: var(--green-soft); color: var(--green-deep); }
