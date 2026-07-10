@@ -51,9 +51,7 @@
     const googleBlock = isInApp
       ? `<div class="gate-inapp">📱 지금 앱 속 브라우저로 열려 있어요. <b>구글 로그인은 Chrome·Safari에서만</b> 돼요. 아래 <b>이메일</b>로 로그인하시거나, 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>를 눌러주세요.</div>
          <div class="gate-divider"><span>이메일로 로그인</span></div>`
-      : `<button type="button" class="social-btn google" id="google-btn">
-           <span class="g">G</span> 구글로 계속하기
-         </button>
+      : `<div class="gate-gis" id="google-btn"></div>
          <div class="gate-divider"><span>또는 이메일</span></div>`;
     const ov = showOverlay(`
       <div class="gate-box">
@@ -78,11 +76,10 @@
     const busy = (b) => ov.querySelectorAll("button,input").forEach(e => e.disabled = b);
 
     const gbtn = ov.querySelector("#google-btn");
-    if (gbtn) gbtn.onclick = async () => {
-      setErr(""); busy(true);
-      try { await window.signInGoogle(); }
-      catch (e) { busy(false); setErr(googleErr(e)); }
-    };
+    if (gbtn && window.renderGoogleButton) {
+      window.renderGoogleButton(gbtn, (e) => setErr(googleErr(e)))
+        .catch(() => { gbtn.style.display = "none"; });
+    }
     ov.querySelector("#email-form").addEventListener("submit", async (e) => {
       e.preventDefault(); setErr(""); busy(true);
       try { await window.signInEmail(g_email(), g_pw()); }

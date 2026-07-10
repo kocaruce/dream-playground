@@ -387,6 +387,7 @@ body.locked #hub-footer { display: none; }
   margin-bottom: 4px;
 }
 .gate-inapp b { color: #5a3d00; }
+.gate-gis { display: flex; justify-content: center; min-height: 44px; }
 .gate-link {
   display: block;
   width: 100%;

@@ -6,7 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getAuth, onAuthStateChanged, signOut,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail,
-  signInWithPopup, GoogleAuthProvider,
+  signInWithPopup, signInWithCredential, GoogleAuthProvider,
   deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -41,6 +41,39 @@ window.signInEmail = (email, pw) => signInWithEmailAndPassword(auth, email, pw);
 window.signUpEmail = (email, pw) => createUserWithEmailAndPassword(auth, email, pw);
 window.signInGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 window.signOutUser = () => signOut(auth);
+
+// Google Identity Services(GIS): 사파리 등 모바일에서 도메인 간 저장소 차단을
+// 우회하려고 구글 자체 도메인에서 ID 토큰을 받아 Firebase 로그인에 씀.
+const GOOGLE_CLIENT_ID = "1015329905358-6j63r1q02jafntdd93trrf3ice7kia7m.apps.googleusercontent.com";
+let _gisReady = null;
+function loadGIS() {
+  if (_gisReady) return _gisReady;
+  _gisReady = new Promise((resolve, reject) => {
+    if (window.google && google.accounts && google.accounts.id) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true; s.defer = true;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("GIS load failed"));
+    document.head.appendChild(s);
+  });
+  return _gisReady;
+}
+window.renderGoogleButton = async (container, onError) => {
+  await loadGIS();
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: async (resp) => {
+      try { await signInWithCredential(auth, GoogleAuthProvider.credential(resp.credential)); }
+      catch (e) { if (onError) onError(e); }
+    },
+  });
+  google.accounts.id.renderButton(container, {
+    type: "standard", theme: "outline", size: "large",
+    text: "continue_with", shape: "pill", locale: "ko",
+    width: Math.min(container.offsetWidth || 320, 400),
+  });
+};
 window.sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 
 // 선생님 프로필 (users/{uid})
