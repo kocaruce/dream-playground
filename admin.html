@@ -30,6 +30,7 @@
           <div class="nav-group">
             <div class="nav-group-label">놀이 관리</div>
             <button class="nav-item sub" data-panel="cafe"><span class="ni-ic">🧃</span> 카페 놀이</button>
+            <button class="nav-item sub" data-panel="wordquiz"><span class="ni-ic">🧩</span> 낱말 퀴즈</button>
           </div>
         </nav>
         <button id="admin-logout" class="nav-logout">로그아웃</button>
@@ -89,6 +90,18 @@
           </div>
         </section>
 
+        <!-- 낱말 퀴즈 -->
+        <section class="panel" id="panel-wordquiz">
+          <div class="admin-h2-row">
+            <h1 class="panel-title">낱말 퀴즈 <span id="wq-count"></span></h1>
+            <div class="admin-tools">
+              <button class="csv-btn" id="wq-new">+ 새 퀴즈 만들기</button>
+            </div>
+          </div>
+          <div id="wq-list"></div>
+          <div id="wq-editor" hidden></div>
+        </section>
+
         <!-- 카페 놀이 -->
         <section class="panel" id="panel-cafe">
           <h1 class="panel-title">카페 놀이 <span class="panel-sub">오로라 주스 가게</span></h1>
@@ -108,6 +121,7 @@
 
   <script src="js/firebase-config.js"></script>
   <script type="module" src="js/auth.js?v=gis2"></script>
-  <script src="js/admin.js?v=gis3"></script>
+  <script src="js/quiz-model.js?v=wq1"></script>
+  <script src="js/admin.js?v=wq1"></script>
 </body>
 </html>

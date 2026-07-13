@@ -128,3 +128,76 @@ td.empty { text-align: center; color: var(--muted); padding: 40px 0; }
 }
 .ops-row .gate-primary { width: auto; padding: 10px 20px; }
 .ops-result { margin-top: 12px; font-size: 14px; color: var(--green-deep); font-weight: 600; min-height: 18px; }
+
+/* ── 낱말 퀴즈 관리 ── */
+.wq-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 14px 18px; margin-bottom: 10px; box-shadow: var(--shadow);
+}
+.wq-card-main { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.wq-em { font-size: 24px; flex: none; }
+.wq-card-main b { font-size: 16px; }
+.wq-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.wq-card-btns { display: flex; gap: 8px; flex: none; }
+.wq-del { color: #c0402f !important; background: #FBEDEA !important; }
+.wq-empty { color: var(--muted); font-size: 14px; padding: 20px 4px; }
+
+.wq-ed-head { display: flex; justify-content: space-between; margin-bottom: 16px; }
+.wq-ed-head .gate-primary { width: auto; padding: 10px 24px; }
+.wq-ed-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.wq-ed-meta label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.wq-ed-meta input {
+  font-family: inherit; font-size: 15px; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 10px; outline: none; color: var(--ink);
+}
+.wq-ed-meta input:focus { border-color: var(--green); }
+.wq-ed-meta input[type="number"] { width: 90px; }
+.wq-ed-meta label:nth-child(1), .wq-ed-meta label:nth-child(2) { flex: 1; min-width: 200px; }
+.wq-ed-meta label:nth-child(1) input, .wq-ed-meta label:nth-child(2) input, .wq-ed-meta label:nth-child(3) input { width: 100%; }
+
+.wq-ed-body { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+.wq-ed-body > div:first-child { flex: 1 1 360px; min-width: 0; }
+.wq-side { flex: 1 1 300px; min-width: 0; }
+
+.wq-grid { display: grid; gap: 4px; background: #EAF0E4; padding: 8px; border-radius: 12px; }
+.wqc {
+  position: relative; aspect-ratio: 1; border: 1px solid #cfe0bd; background: #fff;
+  border-radius: 6px; font-family: inherit; font-size: 18px; font-weight: 700; color: var(--ink);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.wqc:hover { border-color: var(--green); }
+.wqc.on { background: #FBFCF9; }
+.wqc.sel { outline: 3px solid var(--green); outline-offset: -1px; z-index: 1; }
+.wqc.bad { background: #FBE0DB; border-color: #d24b3a; color: #c0402f; }
+.wqn { position: absolute; top: 1px; left: 3px; font-size: 10px; font-weight: 700; color: var(--coral-deep); }
+.wq-hint { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+.wq-addform { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+.wq-addform-t { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+.wq-addform input {
+  font-family: inherit; font-size: 15px; padding: 10px 12px; width: 100%; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 10px; outline: none; margin-bottom: 8px; color: var(--ink);
+}
+.wq-addform input:focus { border-color: var(--green); }
+.wq-addform .gate-primary { width: 100%; margin-top: 2px; }
+.wq-dir { display: flex; gap: 8px; margin-bottom: 8px; }
+.wq-dir button {
+  flex: 1; font-family: inherit; font-size: 14px; font-weight: 700; padding: 9px;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--muted); cursor: pointer;
+}
+.wq-dir button.on { background: var(--green-soft); color: var(--green-deep); border-color: var(--green); }
+.wq-sel { font-size: 13px; color: var(--ink); margin-bottom: 8px; }
+.wq-sel .muted { color: var(--muted); }
+.wq-msg { font-size: 13px; font-weight: 600; min-height: 16px; margin-top: 8px; }
+.wq-msg.bad { color: #c0402f; }
+.wq-msg.ok { color: var(--green-deep); }
+
+.wq-words { margin-top: 16px; }
+.wq-words-t { font-size: 14px; font-weight: 800; color: var(--muted); margin-bottom: 8px; }
+.wq-word { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.wq-word-dir { flex: none; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
+.wq-word-dir.h { background: var(--green-soft); color: var(--green-deep); }
+.wq-word-dir.v { background: #FCEBD8; color: var(--coral-deep); }
+.wq-word-clue { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.wq-word-del { flex: none; border: none; background: none; color: #c0402f; font-size: 15px; cursor: pointer; padding: 2px 6px; }

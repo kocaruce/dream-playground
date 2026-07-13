@@ -148,5 +148,19 @@ window.adminCleanupDonations = async () => {
   return count;
 };
 
+// ── 낱말 퀴즈 저장소 ── (로그인한 선생님은 읽기, 관리자만 쓰기)
+window.listQuizzes = async () => {
+  const data = await restGet("quizzes");
+  return Object.entries(data).map(([id, v]) => ({ id, ...v }));
+};
+window.saveQuiz = async (id, data) => {
+  const payload = { ...data, updatedAt: Date.now() };
+  if (id) { await set(ref(db, "quizzes/" + id), payload); return id; }
+  payload.createdAt = Date.now();
+  const r = await push(ref(db, "quizzes"), payload);
+  return r.key;
+};
+window.deleteQuiz = (id) => remove(ref(db, "quizzes/" + id));
+
 window.AUTH_READY = true;
 window.dispatchEvent(new Event("auth-ready"));

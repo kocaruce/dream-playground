@@ -210,6 +210,7 @@ async function loadAdmin() {
   document.getElementById("dons-csv").onclick = exportDonsCSV;
   setupCleanup();
   setupNav();
+  setupWordQuiz();
 }
 
 /* ── 좌측 메뉴 ↔ 패널 전환 ── */
@@ -224,6 +225,229 @@ function setupNav() {
   document.querySelectorAll("[data-jump]").forEach(el => { el.onclick = () => show(el.dataset.jump); });
   const logout = document.getElementById("admin-logout");
   if (logout) logout.onclick = async () => { await window.signOutUser(); location.reload(); };
+}
+
+/* ── 낱말 퀴즈 관리 (격자 편집기) ── */
+let wqQuizzes = [];
+let wqEdit = null; // { id, title, subtitle, emojis, rows, cols, words, dir, sel }
+
+function setupWordQuiz() {
+  document.getElementById("wq-new").onclick = () => openQuizEditor(null);
+  loadWordQuizzes();
+}
+
+async function loadWordQuizzes() {
+  try { wqQuizzes = await window.listQuizzes(); }
+  catch (e) { wqQuizzes = []; }
+  renderQuizList();
+}
+
+function renderQuizList() {
+  document.getElementById("wq-editor").hidden = true;
+  const list = document.getElementById("wq-list");
+  list.hidden = false;
+  document.getElementById("wq-count").textContent = `(${wqQuizzes.length}개)`;
+
+  const def = window.QUIZ_DEFAULT;
+  let html = `<div class="wq-card">
+      <div class="wq-card-main"><span class="wq-em">${esc(def.emojis)}</span>
+        <div><b>${esc(def.title)}</b><span class="wq-sub">기본 제공 · ${def.words.length}낱말</span></div></div>
+      <div class="wq-card-btns"><button class="csv-btn" data-clone="default">복제해서 편집</button></div>
+    </div>`;
+  html += wqQuizzes.map(q => `<div class="wq-card">
+      <div class="wq-card-main"><span class="wq-em">${esc(q.emojis || "🧩")}</span>
+        <div><b>${esc(q.title || "제목 없음")}</b><span class="wq-sub">${(q.words || []).length}낱말</span></div></div>
+      <div class="wq-card-btns">
+        <button class="csv-btn" data-edit="${q.id}">수정</button>
+        <button class="csv-btn wq-del" data-del="${q.id}">삭제</button>
+      </div>
+    </div>`).join("");
+  if (!wqQuizzes.length) html += `<p class="wq-empty">아직 만든 퀴즈가 없어요. 위 <b>+ 새 퀴즈 만들기</b> 또는 기본 퀴즈 <b>복제</b>로 시작해 보세요.</p>`;
+  list.innerHTML = html;
+
+  list.querySelector('[data-clone="default"]').onclick = () => openQuizEditor(cloneQuiz(def, true));
+  list.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+    const q = wqQuizzes.find(x => x.id === b.dataset.edit);
+    openQuizEditor(cloneQuiz(q, false));
+  });
+  list.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    const q = wqQuizzes.find(x => x.id === b.dataset.del);
+    if (!confirm(`'${q.title || "제목 없음"}' 퀴즈를 삭제할까요?\n되돌릴 수 없어요.`)) return;
+    try { await window.deleteQuiz(q.id); await loadWordQuizzes(); }
+    catch (e) { alert("삭제에 실패했어요. 보안 규칙(관리자 write 허용)을 확인해 주세요."); }
+  });
+}
+
+function cloneQuiz(q, asNew) {
+  return {
+    id: asNew ? null : q.id,
+    title: (q.title || "") + (asNew ? " (복사본)" : ""),
+    subtitle: q.subtitle || "",
+    emojis: q.emojis || "🧩",
+    rows: q.rows || 8, cols: q.cols || 10,
+    words: (q.words || []).map(w => ({ ...w })),
+    dir: "가로", sel: null,
+  };
+}
+
+function openQuizEditor(draft) {
+  wqEdit = draft || { id: null, title: "", subtitle: "", emojis: "🧩", rows: 8, cols: 10, words: [], dir: "가로", sel: null };
+  wqEdit.dir = wqEdit.dir || "가로";
+  document.getElementById("wq-list").hidden = true;
+  const ed = document.getElementById("wq-editor");
+  ed.hidden = false;
+  ed.innerHTML = `
+    <div class="wq-ed-head">
+      <button class="csv-btn" id="wq-cancel">← 목록으로</button>
+      <button class="gate-primary" id="wq-save">저장하기</button>
+    </div>
+    <div class="wq-ed-meta">
+      <label>제목<input id="wq-title" value="${esc(wqEdit.title)}" placeholder="예: 동물 낱말퀴즈"></label>
+      <label>부제<input id="wq-subtitle" value="${esc(wqEdit.subtitle)}" placeholder="예: 함께 동물 이름을 찾아봐요!"></label>
+      <label>이모지 줄<input id="wq-emojis" value="${esc(wqEdit.emojis)}" placeholder="예: 🐶 🐱 🐰"></label>
+      <label>가로 칸<input id="wq-cols" type="number" min="4" max="16" value="${wqEdit.cols}"></label>
+      <label>세로 칸<input id="wq-rows" type="number" min="4" max="16" value="${wqEdit.rows}"></label>
+    </div>
+    <div class="wq-ed-body">
+      <div><div class="wq-grid" id="wq-grid"></div><p class="wq-hint">단어의 <b>시작 칸</b>을 격자에서 클릭한 뒤 오른쪽에 단어를 입력하세요.</p></div>
+      <div class="wq-side">
+        <div class="wq-addform">
+          <div class="wq-addform-t">단어 추가</div>
+          <div class="wq-dir" id="wq-dir">
+            <button type="button" data-dir="가로">가로 ▶</button>
+            <button type="button" data-dir="세로">세로 ▼</button>
+          </div>
+          <div class="wq-sel" id="wq-sel"></div>
+          <input id="wq-answer" placeholder="정답 (예: 소금)" maxlength="8">
+          <input id="wq-clue" placeholder="힌트 (예: 짠맛을 내는 조미료)">
+          <input id="wq-emoji" placeholder="정답 이모지 (예: 🧂)" maxlength="4">
+          <input id="wq-desc" placeholder="한 줄 설명 (예: 요리에 꼭 필요해요)">
+          <button class="gate-primary" id="wq-add">단어 추가</button>
+          <p class="wq-msg" id="wq-msg"></p>
+        </div>
+        <div class="wq-words" id="wq-words"></div>
+      </div>
+    </div>`;
+
+  const bind = (id, key, num) => {
+    const el = document.getElementById(id);
+    el.oninput = () => {
+      wqEdit[key] = num ? Math.max(4, Math.min(16, parseInt(el.value) || wqEdit[key])) : el.value;
+      if (num) renderGrid();
+    };
+  };
+  bind("wq-title", "title"); bind("wq-subtitle", "subtitle"); bind("wq-emojis", "emojis");
+  bind("wq-cols", "cols", true); bind("wq-rows", "rows", true);
+
+  document.getElementById("wq-cancel").onclick = () => renderQuizList();
+  document.getElementById("wq-save").onclick = saveQuizEditor;
+  document.getElementById("wq-add").onclick = addWordToEditor;
+  document.querySelectorAll("#wq-dir button").forEach(b => b.onclick = () => {
+    wqEdit.dir = b.dataset.dir; updateDirButtons();
+  });
+  updateDirButtons();
+  updateSelLabel();
+  renderGrid();
+  renderWordList();
+}
+
+function updateDirButtons() {
+  document.querySelectorAll("#wq-dir button").forEach(b =>
+    b.classList.toggle("on", b.dataset.dir === wqEdit.dir));
+}
+function updateSelLabel() {
+  const el = document.getElementById("wq-sel");
+  el.innerHTML = wqEdit.sel
+    ? `시작 칸: <b>${wqEdit.sel.r + 1}행 ${wqEdit.sel.c + 1}열</b>`
+    : `시작 칸: <span class="muted">격자를 클릭하세요</span>`;
+}
+
+function renderGrid() {
+  const p = window.buildPuzzle(wqEdit);
+  const cellCh = {}; p.cells.forEach(([r, c, ch]) => cellCh[r + "_" + c] = ch);
+  const conflictKeys = {}; p.conflicts.forEach(cf => { if (cf.r >= 0 && cf.c >= 0) conflictKeys[cf.r + "_" + cf.c] = 1; });
+  const grid = document.getElementById("wq-grid");
+  grid.style.gridTemplateColumns = `repeat(${wqEdit.cols}, 1fr)`;
+  let html = "";
+  for (let r = 0; r < wqEdit.rows; r++) for (let c = 0; c < wqEdit.cols; c++) {
+    const key = r + "_" + c;
+    const on = cellCh[key] != null;
+    const sel = wqEdit.sel && wqEdit.sel.r === r && wqEdit.sel.c === c;
+    const cls = ["wqc"]; if (on) cls.push("on"); if (sel) cls.push("sel"); if (conflictKeys[key]) cls.push("bad");
+    html += `<button type="button" class="${cls.join(" ")}" data-r="${r}" data-c="${c}">${on ? esc(cellCh[key]) : ""
+      }${p.nums[key] ? `<span class="wqn">${p.nums[key]}</span>` : ""}</button>`;
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll(".wqc").forEach(b => b.onclick = () => {
+    wqEdit.sel = { r: +b.dataset.r, c: +b.dataset.c };
+    updateSelLabel(); renderGrid();
+  });
+  const msg = document.getElementById("wq-msg");
+  if (p.conflicts.length && msg) { msg.textContent = "⚠️ 겹치는 글자가 서로 달라요. 빨간 칸을 확인하세요."; msg.className = "wq-msg bad"; }
+}
+
+function addWordToEditor() {
+  const msg = document.getElementById("wq-msg");
+  const setMsg = (m, ok) => { msg.textContent = m; msg.className = "wq-msg" + (ok ? " ok" : " bad"); };
+  const answer = document.getElementById("wq-answer").value.trim();
+  const clue = document.getElementById("wq-clue").value.trim();
+  const emoji = document.getElementById("wq-emoji").value.trim() || "❓";
+  const desc = document.getElementById("wq-desc").value.trim();
+  if (!answer) return setMsg("정답 단어를 입력해 주세요.");
+  if (!wqEdit.sel) return setMsg("격자에서 시작 칸을 먼저 클릭해 주세요.");
+  const w = { answer, dir: wqEdit.dir, r: wqEdit.sel.r, c: wqEdit.sel.c, clue, emoji, desc };
+  // 검증: 임시로 추가해 충돌·범위 확인
+  const test = window.buildPuzzle({ rows: wqEdit.rows, cols: wqEdit.cols, words: wqEdit.words.concat([w]) });
+  const before = window.buildPuzzle(wqEdit).conflicts.length;
+  if (test.conflicts.length > before) {
+    const oob = test.conflicts.some(cf => cf.reason === "밖");
+    return setMsg(oob ? "단어가 격자 밖으로 나가요. 시작 위치나 격자 크기를 조정하세요." : "겹치는 칸의 글자가 달라요. 교차 글자를 맞춰 주세요.");
+  }
+  wqEdit.words.push(w);
+  document.getElementById("wq-answer").value = "";
+  document.getElementById("wq-clue").value = "";
+  document.getElementById("wq-emoji").value = "";
+  document.getElementById("wq-desc").value = "";
+  setMsg("추가했어요! ✨", true);
+  renderGrid(); renderWordList();
+}
+
+function renderWordList() {
+  const host = document.getElementById("wq-words");
+  if (!wqEdit.words.length) { host.innerHTML = `<p class="wq-empty">추가한 단어가 여기에 표시돼요.</p>`; return; }
+  host.innerHTML = `<div class="wq-words-t">추가한 단어 (${wqEdit.words.length})</div>` +
+    wqEdit.words.map((w, i) => `<div class="wq-word">
+      <span class="wq-word-dir ${w.dir === "가로" ? "h" : "v"}">${w.dir}</span>
+      <b>${esc(w.answer)}</b> <span class="wq-word-clue">${esc(w.clue || "")}</span>
+      <button class="wq-word-del" data-i="${i}">✕</button>
+    </div>`).join("");
+  host.querySelectorAll(".wq-word-del").forEach(b => b.onclick = () => {
+    wqEdit.words.splice(+b.dataset.i, 1); renderGrid(); renderWordList();
+  });
+}
+
+async function saveQuizEditor() {
+  const msg = document.getElementById("wq-msg");
+  const title = document.getElementById("wq-title").value.trim();
+  if (!title) { msg.textContent = "제목을 입력해 주세요."; msg.className = "wq-msg bad"; return; }
+  if (!wqEdit.words.length) { msg.textContent = "단어를 하나 이상 추가해 주세요."; msg.className = "wq-msg bad"; return; }
+  const p = window.buildPuzzle(wqEdit);
+  if (p.conflicts.length) { msg.textContent = "겹치는 글자 충돌을 먼저 해결해 주세요 (빨간 칸)."; msg.className = "wq-msg bad"; return; }
+  const data = {
+    title, subtitle: document.getElementById("wq-subtitle").value.trim(),
+    emojis: document.getElementById("wq-emojis").value.trim() || "🧩",
+    rows: wqEdit.rows, cols: wqEdit.cols,
+    words: wqEdit.words.map(w => ({ answer: w.answer, dir: w.dir, r: w.r, c: w.c, clue: w.clue || "", emoji: w.emoji || "❓", desc: w.desc || "" })),
+  };
+  const btn = document.getElementById("wq-save");
+  btn.disabled = true; btn.textContent = "저장 중…";
+  try {
+    await window.saveQuiz(wqEdit.id, data);
+    await loadWordQuizzes();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "저장하기";
+    msg.textContent = "저장에 실패했어요. 보안 규칙(관리자 write 허용)을 확인해 주세요."; msg.className = "wq-msg bad";
+  }
 }
 
 function begin() {

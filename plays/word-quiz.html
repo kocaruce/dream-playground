@@ -122,14 +122,34 @@
 
   .foot{text-align:center;font-size:17px;opacity:.6;margin-top:28px;}
   @media print{ body{background:#fff;} .btnrow,.nav,.tap-hint{display:none;} .panel{box-shadow:none;} }
+  /* ===== 게이트 · 퀴즈 선택 ===== */
+  .wq-screen{max-width:1000px;margin:0 auto;}
+  .wq-splash{text-align:center;font-family:'Jua',sans-serif;font-size:40px;color:var(--tomato);padding:90px 0;line-height:1.5;}
+  .wq-gate-msg{text-align:center;font-family:'Jua',sans-serif;font-size:26px;color:var(--ink);line-height:1.6;padding:70px 20px;}
+  .wq-gate-msg .btn{display:inline-block;margin-top:22px;text-decoration:none;min-width:auto;}
+  .wq-select-head{text-align:center;margin:6px 0 26px;}
+  .wq-select-head h1{font-family:'Jua',sans-serif;font-size:clamp(28px,5vw,44px);color:var(--tomato);text-shadow:3px 3px 0 #fff;}
+  .wq-select-head .sub{font-size:20px;opacity:.8;margin-top:6px;}
+  .wq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .wq-quiz{background:#fff;border:4px solid var(--line);border-radius:22px;padding:22px;box-shadow:6px 6px 0 rgba(59,46,32,.14);cursor:pointer;text-align:center;transition:transform .08s;touch-action:manipulation;}
+  .wq-quiz:active{transform:translate(2px,2px);box-shadow:3px 3px 0 rgba(59,46,32,.14);}
+  .wq-quiz .em{font-size:40px;letter-spacing:4px;}
+  .wq-quiz h3{font-family:'Jua',sans-serif;font-size:26px;color:var(--ink);margin:8px 0 4px;}
+  .wq-quiz p{font-size:16px;opacity:.75;line-height:1.4;}
+  .wq-quiz .meta{margin-top:10px;font-size:14px;color:var(--tomato);font-weight:700;}
+  .wq-back{font-family:'Jua',sans-serif;font-size:18px;background:#fff;border:3px solid var(--line);border-radius:40px;padding:8px 18px;cursor:pointer;box-shadow:3px 3px 0 rgba(59,46,32,.15);margin-bottom:12px;}
+  .wq-back:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(59,46,32,.15);}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div id="wq-gate" class="wq-screen"></div>
+<div id="wq-select" class="wq-screen" hidden></div>
+<div class="wrap" id="game" hidden>
   <header>
-    <h1>식재료 가로세로 낱말퀴즈</h1>
-    <div class="sub">우리 친구들과 함께 맛있는 낱말을 찾아봐요!</div>
-    <div class="veg-row">🥕 🥬 🍠 🌶️ 🐟 🧂</div>
+    <button id="back-btn" class="wq-back">← 다른 퀴즈 고르기</button>
+    <h1 id="q-title">낱말퀴즈</h1>
+    <div class="sub" id="q-sub"></div>
+    <div class="veg-row" id="q-emojis"></div>
   </header>
 
   <div class="layout">
@@ -162,151 +182,9 @@
   <div class="foot">카드를 콕! 누르면 정답이 짠~ 하고 나와요 · 가로와 세로는 따로따로 확인할 수 있어요</div>
 </div>
 
-<script>
-  const CELLS=[[0,8,"소"],[0,9,"금"],[1,8,"고"],[2,5,"다"],[2,7,"참"],[2,8,"기"],[2,9,"름"],
-    [3,5,"시"],[3,6,"금"],[3,7,"치"],[4,3,"고"],[4,4,"구"],[4,5,"마"],
-    [5,1,"양"],[5,2,"배"],[5,3,"추"],[6,1,"상"],[6,3,"장"],[6,4,"어"],[7,0,"부"],[7,1,"추"]];
-  const NUMS={"0_8":1,"2_5":2,"2_7":3,"3_5":4,"4_3":5,"5_1":6,"6_3":7,"7_0":8};
-
-  const board=document.getElementById('board');
-  const ans={}; CELLS.forEach(([r,c,ch])=>ans[r+"_"+c]=ch);
-  const inputs={};
-  for(let r=0;r<8;r++){for(let c=0;c<10;c++){
-    const key=r+"_"+c; const div=document.createElement('div');
-    if(ans[key]){
-      div.className='cell on'; div.dataset.key=key;
-      if(NUMS[key]){const s=document.createElement('span');s.className='num';s.textContent=NUMS[key];div.appendChild(s);}
-      const inp=document.createElement('input');
-      inp.className='cinp'; inp.type='text'; inp.setAttribute('inputmode','text'); inp.maxLength=2;
-      inp.addEventListener('input',()=>{div.classList.remove('correct','wrong'); document.getElementById('result').textContent='';});
-      div.appendChild(inp); inputs[key]=inp;
-    } else { div.className='cell'; }
-    board.appendChild(div);
-  }}
-
-  function gradeAll(){
-    let total=0, right=0;
-    for(const key in ans){
-      total++;
-      const cellDiv=board.querySelector('[data-key="'+key+'"]');
-      const v=(inputs[key].value||'').trim();
-      cellDiv.classList.remove('correct','wrong');
-      if(v===''){continue;}
-      if(v===ans[key]){cellDiv.classList.add('correct');right++;}
-      else{cellDiv.classList.add('wrong');}
-    }
-    return {total,right};
-  }
-  document.getElementById('checkBtn').addEventListener('click',()=>{
-    const {total,right}=gradeAll();
-    const res=document.getElementById('result');
-    if(right===total) res.textContent='🎉 와! '+total+'칸 모두 정답이에요!';
-    else res.textContent='총 '+total+'칸 중 '+right+'칸 맞았어요! 다시 도전해봐요 💪';
-  });
-  document.getElementById('showBtn').addEventListener('click',()=>{
-    for(const key in ans){
-      const cellDiv=board.querySelector('[data-key="'+key+'"]');
-      inputs[key].value=ans[key];
-      cellDiv.classList.remove('wrong'); cellDiv.classList.add('correct');
-    }
-    document.getElementById('result').textContent='정답을 모두 보여줄게요 ✨';
-  });
-  document.getElementById('clearBtn').addEventListener('click',()=>{
-    for(const key in ans){
-      inputs[key].value='';
-      board.querySelector('[data-key="'+key+'"]').classList.remove('correct','wrong');
-    }
-    document.getElementById('result').textContent='';
-  });
-
-  const COLORS=[['#FFD36B','#FFE9A8'],['#9CD6F5','#C9EAFB'],['#FF9E8A','#FFC9BE'],['#A9DD7B','#CFEEAE'],
-    ['#C9A7E8','#E2CFF4'],['#FFB85C','#FFD49A'],['#7FD0C4','#B4E6DE'],['#F4A0C0','#FBC9DC']];
-  const CARDS=[
-    {n:1,clues:[
-      {dir:'가로',text:'짠맛을 내는 기본 조미료',blanks:2,word:'소금',emoji:'🧂',desc:'요리에 꼭 필요해요'},
-      {dir:'세로',text:'소에서 얻는 붉은 고기',blanks:3,word:'소고기',emoji:'🥩',desc:'불고기를 만들어요'}]},
-    {n:2,clues:[
-      {dir:'세로',text:'감칠맛 국물을 내는 검은 바다풀',blanks:3,word:'다시마',emoji:'🌿',desc:'국물이 깊어져요'}]},
-    {n:3,clues:[
-      {dir:'가로',text:'참깨를 짜서 만든 고소한 기름',blanks:3,word:'참기름',emoji:'🫗',desc:'나물 무침에 톡톡'},
-      {dir:'세로',text:'통조림으로 즐겨 먹는 큰 바닷물고기',blanks:2,word:'참치',emoji:'🐟',desc:'김밥에 넣어요'}]},
-    {n:4,clues:[
-      {dir:'가로',text:'철분이 많은 녹색 잎채소, 뽀빠이가 먹던',blanks:3,word:'시금치',emoji:'🥬',desc:'힘이 불끈!'}]},
-    {n:5,clues:[
-      {dir:'가로',text:'달콤한 뿌리채소, 구워 먹어요',blanks:3,word:'고구마',emoji:'🍠',desc:'겨울 간식이에요'},
-      {dir:'세로',text:'매운맛을 내는 붉은 발효 양념',blanks:3,word:'고추장',emoji:'🌶️',desc:'비빔밥에 쓱쓱'}]},
-    {n:6,clues:[
-      {dir:'가로',text:'둥글고 단단한 잎채소, 쌈에 싸 먹어요',blanks:3,word:'양배추',emoji:'🥬',desc:'아삭아삭'},
-      {dir:'세로',text:'아삭한 잎채소, 샐러드에 넣어요',blanks:3,word:'양상추',emoji:'🥗',desc:'햄버거에도'}]},
-    {n:7,clues:[
-      {dir:'가로',text:'기름지고 길쭉한 보양 생선, 구이로',blanks:2,word:'장어',emoji:'🐟',desc:'힘이 솟아요'}]},
-    {n:8,clues:[
-      {dir:'가로',text:'가늘고 긴 잎채소, 전이나 무침에',blanks:2,word:'부추',emoji:'🌱',desc:'부추전이 맛있어요'}]}
-  ];
-
-  let idx=0;
-  const tiles=document.getElementById('tiles');
-  const prog=document.getElementById('progress');
-  const prevBtn=document.getElementById('prevBtn');
-  const nextBtn=document.getElementById('nextBtn');
-
-  CARDS.forEach((c,i)=>{
-    const p=document.createElement('div');p.className='pip';p.textContent=c.n;
-    p.addEventListener('click',()=>{idx=i;render();});prog.appendChild(p);
-  });
-  function dots(n){return '○ '.repeat(n).trim();}
-
-  function render(){
-    const card=CARDS[idx];
-    const [c1,c2]=COLORS[idx];
-    tiles.innerHTML='';
-    card.clues.forEach(cl=>{
-      const tile=document.createElement('div');tile.className='tile';
-      tile.style.setProperty('--c1',c1);tile.style.setProperty('--c2',c2);
-      tile.innerHTML=
-        '<div class="tinner">'+
-          '<div class="tface tfront">'+
-            '<div class="tag"><span class="dir">'+cl.dir+'</span></div>'+
-            '<div class="clue-text">'+cl.text+'</div>'+
-            '<div class="blanks">'+dots(cl.blanks)+'</div>'+
-            '<div class="tap-hint">👆 눌러서 정답 보기</div>'+
-          '</div>'+
-          '<div class="tface tback">'+
-            '<div class="ans-emoji">'+cl.emoji+'</div>'+
-            '<div class="ans-word">'+cl.word+'</div>'+
-            '<div class="ans-desc">'+cl.desc+'</div>'+
-          '</div>'+
-        '</div>';
-      tile.addEventListener('click',()=>tile.classList.toggle('flipped'));
-      tiles.appendChild(tile);
-    });
-    [...prog.children].forEach((p,i)=>p.classList.toggle('active',i===idx));
-    prevBtn.disabled=idx===0; nextBtn.disabled=idx===CARDS.length-1;
-  }
-  prevBtn.addEventListener('click',()=>{if(idx>0){idx--;render();}});
-  nextBtn.addEventListener('click',()=>{if(idx<CARDS.length-1){idx++;render();}});
-  render();
-
-  /* ===== 핀치 확대/더블탭 확대 잠금 ===== */
-  document.addEventListener('touchmove',function(e){ if(e.touches.length>1){e.preventDefault();} },{passive:false});
-  document.addEventListener('gesturestart',function(e){e.preventDefault();});
-  let lastTouch=0;
-  document.addEventListener('touchend',function(e){
-    const now=Date.now();
-    if(now-lastTouch<=300){e.preventDefault();}
-    lastTouch=now;
-  },{passive:false});
-
-  /* ===== PWA: 서비스워커 (호스팅 시 오프라인) ===== */
-  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-    const sw="self.addEventListener('install',e=>self.skipWaiting());"+
-             "self.addEventListener('activate',e=>self.clients.claim());"+
-             "self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});";
-    try{
-      const blob=new Blob([sw],{type:'text/javascript'});
-      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-    }catch(_){}
-  }
-</script>
+<script src="../js/firebase-config.js"></script>
+<script type="module" src="../js/auth.js?v=gis2"></script>
+<script src="../js/quiz-model.js?v=wq1"></script>
+<script src="../js/quiz-play.js?v=wq1"></script>
 </body>
 </html>
