@@ -7,6 +7,8 @@
 
   let quizzes = [];
   let idx = 0, CARDS = [], inputs = {}, ans = {};
+  // 입력 모드: "cards"(글자 카드 선택, 기본) | "type"(직접 타이핑, 심화)
+  let mode = "cards", selKey = null;
 
   const COLORS = [['#FFD36B', '#FFE9A8'], ['#9CD6F5', '#C9EAFB'], ['#FF9E8A', '#FFC9BE'], ['#A9DD7B', '#CFEEAE'],
     ['#C9A7E8', '#E2CFF4'], ['#FFB85C', '#FFD49A'], ['#7FD0C4', '#B4E6DE'], ['#F4A0C0', '#FBC9DC']];
@@ -74,6 +76,7 @@
         const inp = document.createElement("input");
         inp.className = "cinp"; inp.type = "text"; inp.setAttribute("inputmode", "text"); inp.maxLength = 2;
         inp.addEventListener("input", () => { div.classList.remove("correct", "wrong"); $("result").textContent = ""; });
+        div.addEventListener("click", () => { if (mode === "cards") selectCell(key); });
         div.appendChild(inp); inputs[key] = inp;
       } else { div.className = "cell"; }
       board.appendChild(div);
@@ -88,7 +91,57 @@
     });
     renderCard();
     $("result").textContent = "";
+    renderTray();
+    setMode(mode);
+    selectCell(null);
     showScreen("game");
+  }
+
+  // ── 글자 카드 입력 ──
+  function setMode(m) {
+    mode = m;
+    const btn = $("modeBtn");
+    if (btn) btn.textContent = m === "cards" ? "🃏 글자 카드" : "⌨️ 글자 쓰기";
+    for (const key in inputs) inputs[key].readOnly = (m === "cards");
+    const tray = $("tray");
+    if (tray) tray.hidden = (m !== "cards");
+    if (m !== "cards") selectCell(null);
+  }
+
+  function selectCell(key) {
+    selKey = key;
+    $("board").querySelectorAll(".cell.sel").forEach(d => d.classList.remove("sel"));
+    if (key) {
+      const d = $("board").querySelector('[data-key="' + key + '"]');
+      if (d) d.classList.add("sel");
+    }
+  }
+
+  // 트레이: 퍼즐의 글자(중복 제거) + 방해 글자 몇 개를 섞어 보여줌
+  const DISTRACTORS = ["가", "나", "도", "루", "미", "보", "수", "오", "코", "하"];
+  function renderTray() {
+    const tray = $("tray");
+    if (!tray) return;
+    const set = new Set(Object.values(ans));
+    const chars = [...set];
+    for (const d of DISTRACTORS) {
+      if (chars.length >= Math.max(10, set.size + 3)) break;
+      if (!set.has(d)) chars.push(d);
+    }
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    tray.innerHTML = chars.map(c => `<button type="button" class="lcard">${esc(c)}</button>`).join("") +
+      `<button type="button" class="lcard eraser" aria-label="지우기">🧽</button>`;
+    tray.querySelectorAll(".lcard").forEach(b => b.onclick = () => {
+      if (!selKey) { $("result").textContent = "먼저 채울 칸을 콕 눌러 주세요 👆"; return; }
+      const cellDiv = $("board").querySelector('[data-key="' + selKey + '"]');
+      inputs[selKey].value = b.classList.contains("eraser") ? "" : b.textContent;
+      cellDiv.classList.remove("correct", "wrong");
+      $("result").textContent = "";
+      selectCell(null);
+    });
   }
 
   function renderCard() {
@@ -160,6 +213,8 @@
     $("prevBtn").onclick = () => { if (idx > 0) { idx--; renderCard(); } };
     $("nextBtn").onclick = () => { if (idx < CARDS.length - 1) { idx++; renderCard(); } };
     $("back-btn").onclick = () => renderSelect();
+    const mb = $("modeBtn");
+    if (mb) mb.onclick = () => setMode(mode === "cards" ? "type" : "cards");
   }
 
   // ── 부팅 ──
