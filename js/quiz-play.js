@@ -66,6 +66,8 @@
     const board = $("board");
     board.style.gridTemplateColumns = `repeat(${p.cols},1fr)`;
     board.style.aspectRatio = `${p.cols}/${p.rows}`;
+    // 칸 크기 하한(터치 타깃) 보장: 좁은 화면에선 보드가 좌우 스크롤됨
+    board.style.minWidth = (p.cols * 51) + "px"; // 46px 칸 + 5px 간격
     board.innerHTML = "";
     ans = {}; inputs = {};
     p.cells.forEach(([r, c, ch]) => { ans[r + "_" + c] = ch; });
@@ -146,7 +148,11 @@
       if (d) d.classList.add("word");
     });
     const d = board.querySelector('[data-key="' + key + '"]');
-    if (d) d.classList.add("sel");
+    if (d) {
+      d.classList.add("sel");
+      // 좁은 화면에서 보드가 스크롤될 때 선택 칸이 항상 보이게
+      if (d.scrollIntoView) d.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    }
     updateClueBar();
   }
 
