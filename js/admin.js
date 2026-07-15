@@ -211,6 +211,7 @@ async function loadAdmin() {
   setupCleanup();
   setupNav();
   setupWordQuiz();
+  setupSurvey();
 }
 
 /* ── 좌측 메뉴 ↔ 패널 전환 ── */
@@ -447,6 +448,166 @@ async function saveQuizEditor() {
   } catch (e) {
     btn.disabled = false; btn.textContent = "저장하기";
     msg.textContent = "저장에 실패했어요. 보안 규칙(관리자 write 허용)을 확인해 주세요."; msg.className = "wq-msg bad";
+  }
+}
+
+/* ── 조사 놀이 관리 ── */
+let svSurveys = [];
+let svEdit = null; // { id, title, showLive, options:[{emoji,name}] }
+
+// 아이들 조사에 자주 쓰는 이모지 모음 (음식·동물·자연·마음·놀이)
+const SV_EMOJIS = [
+  "🍎", "🍌", "🍇", "🍓", "🍉", "🍊", "🥕", "🌽", "🍞", "🧀", "🥛", "🍗", "🍕", "🍜", "🍙", "🍪", "🍰", "🍦",
+  "🐶", "🐱", "🐰", "🐻", "🐼", "🐷", "🦁", "🐘", "🦒", "🐟", "🐤", "🦋",
+  "☀️", "🌧️", "☁️", "⛄", "🌈", "🌸", "🌳",
+  "😀", "😢", "😴", "😡", "🥰", "😮",
+  "⚽", "🎨", "🎵", "📚", "🧩", "🚗", "✈️", "🏠", "❤️", "⭐", "👍",
+];
+
+function setupSurvey() {
+  document.getElementById("sv-new").onclick = () => openSurveyEditor(null);
+  loadSurveys();
+}
+
+async function loadSurveys() {
+  try { svSurveys = await window.listSurveys(); }
+  catch (e) { svSurveys = []; }
+  svSurveys.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  renderSurveyList();
+}
+
+function renderSurveyList() {
+  document.getElementById("sv-editor").hidden = true;
+  const list = document.getElementById("sv-list");
+  list.hidden = false;
+  document.getElementById("sv-count").textContent = `(${svSurveys.length}개)`;
+
+  let html = svSurveys.map(s => {
+    const closed = s.status === "closed";
+    return `<div class="wq-card">
+      <div class="wq-card-main"><span class="wq-em">${esc((s.options || []).map(o => o.emoji).join(""))}</span>
+        <div><b>${esc(s.title || "제목 없음")}</b>
+        <span class="wq-sub">${(s.options || []).length}개 선택지 · ${closed ? "🔴 마감" : "🟢 진행 중"}${s.showLive === false ? " · 결과 비공개" : ""}</span></div></div>
+      <div class="wq-card-btns">
+        <button class="csv-btn" data-toggle="${s.id}">${closed ? "다시 열기" : "마감"}</button>
+        <button class="csv-btn" data-reset="${s.id}">기록 지우기</button>
+        <button class="csv-btn" data-edit="${s.id}">수정</button>
+        <button class="csv-btn wq-del" data-del="${s.id}">삭제</button>
+      </div>
+    </div>`;
+  }).join("");
+  if (!svSurveys.length) html = `<p class="wq-empty">아직 만든 조사가 없어요. 위 <b>+ 새 조사 만들기</b>로 시작해 보세요.<br>예: "오늘 기분은 어때요?", "어떤 과일이 좋아요?"</p>`;
+  list.innerHTML = html;
+
+  const fail = () => alert("실패했어요. 보안 규칙(surveys/votes)을 확인해 주세요.");
+  list.querySelectorAll("[data-toggle]").forEach(b => b.onclick = async () => {
+    const s = svSurveys.find(x => x.id === b.dataset.toggle);
+    try {
+      await window.saveSurvey(s.id, { ...s, id: undefined, status: s.status === "closed" ? "open" : "closed" });
+      await loadSurveys();
+    } catch (e) { fail(); }
+  });
+  list.querySelectorAll("[data-reset]").forEach(b => b.onclick = async () => {
+    const s = svSurveys.find(x => x.id === b.dataset.reset);
+    if (!confirm(`'${s.title}'의 투표 기록을 모두 지울까요?\n그래프가 0부터 다시 시작돼요.`)) return;
+    try { await window.clearVotes(s.id); alert("기록을 지웠어요."); } catch (e) { fail(); }
+  });
+  list.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+    const s = svSurveys.find(x => x.id === b.dataset.edit);
+    openSurveyEditor({ id: s.id, title: s.title || "", showLive: s.showLive !== false, status: s.status || "open", options: (s.options || []).map(o => ({ ...o })) });
+  });
+  list.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    const s = svSurveys.find(x => x.id === b.dataset.del);
+    if (!confirm(`'${s.title || "제목 없음"}' 조사를 삭제할까요?\n투표 기록도 함께 지워지며 되돌릴 수 없어요.`)) return;
+    try { await window.deleteSurvey(s.id); await loadSurveys(); } catch (e) { fail(); }
+  });
+}
+
+function openSurveyEditor(draft) {
+  svEdit = draft || {
+    id: null, title: "", showLive: true, status: "open",
+    options: [{ emoji: "🍎", name: "" }, { emoji: "🍌", name: "" }],
+  };
+  document.getElementById("sv-list").hidden = true;
+  const ed = document.getElementById("sv-editor");
+  ed.hidden = false;
+  ed.innerHTML = `
+    <div class="wq-ed-head">
+      <button class="csv-btn" id="sv-cancel">← 목록으로</button>
+      <button class="gate-primary" id="sv-save">저장하기</button>
+    </div>
+    <div class="wq-ed-meta">
+      <label>질문<input id="sv-title" value="${esc(svEdit.title)}" placeholder="예: 오늘 간식은 뭐가 좋아?"></label>
+      <label class="sv-check"><input type="checkbox" id="sv-live" ${svEdit.showLive ? "checked" : ""}> 투표 중에도 그래프 공개 (끄면 마감 후 공개)</label>
+    </div>
+    <div class="sv-opts" id="sv-opts"></div>
+    <button class="csv-btn" id="sv-add-opt">+ 선택지 추가 (최대 4개)</button>
+    <div class="sv-palette" id="sv-palette" hidden></div>
+    <p class="wq-msg" id="sv-msg"></p>`;
+
+  document.getElementById("sv-cancel").onclick = () => renderSurveyList();
+  document.getElementById("sv-save").onclick = saveSurveyEditor;
+  document.getElementById("sv-title").oninput = (e) => { svEdit.title = e.target.value; };
+  document.getElementById("sv-live").onchange = (e) => { svEdit.showLive = e.target.checked; };
+  document.getElementById("sv-add-opt").onclick = () => {
+    if (svEdit.options.length >= 4) return;
+    svEdit.options.push({ emoji: "⭐", name: "" });
+    renderSurveyOptions();
+  };
+  renderSurveyOptions();
+}
+
+let svPaletteFor = -1; // 이모지 선택판이 열린 선택지 인덱스
+
+function renderSurveyOptions() {
+  const host = document.getElementById("sv-opts");
+  host.innerHTML = svEdit.options.map((o, i) => `
+    <div class="sv-opt-row">
+      <button type="button" class="sv-emoji-btn" data-pal="${i}" title="그림 고르기">${esc(o.emoji || "❓")}</button>
+      <input data-name="${i}" value="${esc(o.name)}" placeholder="이름 (예: 사과)" maxlength="10">
+      <button type="button" class="wq-word-del" data-rm="${i}" ${svEdit.options.length <= 2 ? "disabled" : ""}>✕</button>
+    </div>`).join("");
+  document.getElementById("sv-add-opt").style.display = svEdit.options.length >= 4 ? "none" : "";
+
+  host.querySelectorAll("[data-name]").forEach(inp => inp.oninput = () => { svEdit.options[+inp.dataset.name].name = inp.value; });
+  host.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => {
+    svEdit.options.splice(+b.dataset.rm, 1);
+    svPaletteFor = -1; document.getElementById("sv-palette").hidden = true;
+    renderSurveyOptions();
+  });
+  host.querySelectorAll("[data-pal]").forEach(b => b.onclick = () => toggleSurveyPalette(+b.dataset.pal, b));
+}
+
+function toggleSurveyPalette(i, btn) {
+  const pal = document.getElementById("sv-palette");
+  if (svPaletteFor === i && !pal.hidden) { pal.hidden = true; svPaletteFor = -1; return; }
+  svPaletteFor = i;
+  pal.innerHTML = SV_EMOJIS.map(e => `<button type="button" class="sv-pal-em">${e}</button>`).join("");
+  pal.hidden = false;
+  btn.closest(".sv-opt-row").after(pal); // 해당 선택지 바로 아래에 표시
+  pal.querySelectorAll(".sv-pal-em").forEach(b => b.onclick = () => {
+    svEdit.options[svPaletteFor].emoji = b.textContent;
+    pal.hidden = true; svPaletteFor = -1;
+    renderSurveyOptions();
+  });
+}
+
+async function saveSurveyEditor() {
+  const msg = document.getElementById("sv-msg");
+  const setMsg = (m) => { msg.textContent = m; msg.className = "wq-msg bad"; };
+  const title = (svEdit.title || "").trim();
+  if (!title) return setMsg("질문을 입력해 주세요.");
+  const options = svEdit.options.map(o => ({ emoji: o.emoji || "❓", name: (o.name || "").trim() }));
+  if (options.length < 2) return setMsg("선택지를 2개 이상 만들어 주세요.");
+  if (options.some(o => !o.name)) return setMsg("모든 선택지에 이름을 입력해 주세요.");
+  const btn = document.getElementById("sv-save");
+  btn.disabled = true; btn.textContent = "저장 중…";
+  try {
+    await window.saveSurvey(svEdit.id, { title, options, showLive: svEdit.showLive !== false, status: svEdit.status || "open" });
+    await loadSurveys();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "저장하기";
+    setMsg("저장에 실패했어요. 보안 규칙(surveys 관리자 write)을 확인해 주세요.");
   }
 }
 

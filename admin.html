@@ -33,6 +33,7 @@
             <div class="nav-group-label">놀이 관리</div>
             <button class="nav-item sub" data-panel="cafe"><span class="ni-ic">🧃</span> 카페 놀이</button>
             <button class="nav-item sub" data-panel="wordquiz"><span class="ni-ic">🧩</span> 낱말 퀴즈</button>
+            <button class="nav-item sub" data-panel="survey"><span class="ni-ic">📊</span> 조사 놀이</button>
           </div>
         </nav>
         <button id="admin-logout" class="nav-logout">로그아웃</button>
@@ -102,6 +103,18 @@
           </div>
           <div id="wq-list"></div>
           <div id="wq-editor" hidden></div>
+        </section>
+
+        <!-- 조사 놀이 -->
+        <section class="panel" id="panel-survey">
+          <div class="admin-h2-row">
+            <h1 class="panel-title">조사 놀이 <span id="sv-count"></span></h1>
+            <div class="admin-tools">
+              <button class="csv-btn" id="sv-new">+ 새 조사 만들기</button>
+            </div>
+          </div>
+          <div id="sv-list"></div>
+          <div id="sv-editor" hidden></div>
         </section>
 
         <!-- 카페 놀이 -->

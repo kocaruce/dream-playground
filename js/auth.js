@@ -9,7 +9,7 @@ import {
   signInWithPopup, signInWithCredential, GoogleAuthProvider,
   deleteUser, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, update, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 // 관리자(99p) uid — 회원 목록·후원 기록 열람 권한
 const ADMIN_UID = "qoYHZGbPCqShikrQJ6UbfBKSVPT2";
@@ -161,6 +161,31 @@ window.saveQuiz = async (id, data) => {
   return r.key;
 };
 window.deleteQuiz = (id) => remove(ref(db, "quizzes/" + id));
+
+// ── 조사 놀이 저장소 ── (surveys: 선생님 읽기·관리자 쓰기 / votes: 생성만, 관리자 정리)
+window.listSurveys = async () => {
+  const data = await restGet("surveys");
+  return Object.entries(data).map(([id, v]) => ({ id, ...v }));
+};
+window.saveSurvey = async (id, data) => {
+  const payload = { ...data, updatedAt: Date.now() };
+  if (id) { await set(ref(db, "surveys/" + id), payload); return id; }
+  payload.createdAt = Date.now();
+  const r = await push(ref(db, "surveys"), payload);
+  return r.key;
+};
+window.deleteSurvey = async (id) => {
+  await remove(ref(db, "surveys/" + id));
+  try { await remove(ref(db, "votes/" + id)); } catch (e) {}
+};
+// 투표 1건 기록 (opt: 선택지 인덱스)
+window.submitVote = (surveyId, opt) => {
+  const user = auth.currentUser;
+  return push(ref(db, "votes/" + surveyId), { opt, uid: user ? user.uid : "", at: Date.now() });
+};
+// 실시간 투표 구독: cb({voteId: {opt,...}}) — 해제 함수 반환
+window.watchVotes = (surveyId, cb) => onValue(ref(db, "votes/" + surveyId), (snap) => cb(snap.val() || {}));
+window.clearVotes = (surveyId) => remove(ref(db, "votes/" + surveyId));
 
 window.AUTH_READY = true;
 window.dispatchEvent(new Event("auth-ready"));

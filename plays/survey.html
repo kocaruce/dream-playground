@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="robots" content="noindex, nofollow">
+<title>우리 반 조사 놀이 — 꿈 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF6EA; --ink:#3B2E20; --line:#3B2E20; --muted:#8a7a66;
+    --card:#fff; --sun:#FFC542; --tomato:#F2564D; --leaf:#5BBB5E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--ink);font-family:'Jua',sans-serif;
+    background-image:radial-gradient(#f3e3c8 6%, transparent 7%);background-size:34px 34px;}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 40px;}
+  [hidden]{display:none !important;}
+
+  .top{display:flex;justify-content:center;margin-bottom:14px;}
+  .chip-btn{
+    font-family:'Jua',sans-serif;font-size:17px;color:var(--ink);background:#fff;
+    border:3px solid var(--line);border-radius:40px;padding:9px 20px;cursor:pointer;
+    box-shadow:3px 3px 0 rgba(59,46,32,.15);touch-action:manipulation;text-decoration:none;display:inline-block;
+  }
+  .chip-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(59,46,32,.15);}
+
+  .sv-splash{margin-top:26vh;text-align:center;font-size:34px;line-height:1.5;animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+  .sv-msg{margin-top:20vh;text-align:center;font-size:24px;line-height:1.8;}
+  .sv-msg .chip-btn{margin-top:18px;font-size:19px;}
+
+  .sv-head{text-align:center;margin-bottom:18px;}
+  .sv-head h1{font-size:clamp(30px,5vw,44px);color:var(--tomato);
+    text-shadow:2px 2px 0 #fff, 4px 4px 0 rgba(59,46,32,.12);}
+  .sv-head .sub{font-family:'Gaegu',sans-serif;font-weight:700;font-size:19px;color:var(--muted);margin-top:4px;}
+
+  .sv-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;max-width:820px;margin:0 auto;}
+  .sv-item{
+    background:var(--card);border:3px solid var(--line);border-radius:20px;
+    box-shadow:5px 5px 0 rgba(59,46,32,.15);padding:20px;cursor:pointer;text-align:center;
+    touch-action:manipulation;
+  }
+  .sv-item:active{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(59,46,32,.15);}
+  .sv-item .em{font-size:44px;margin-bottom:8px;}
+  .sv-item h3{font-size:23px;line-height:1.35;}
+  .sv-item .meta{font-family:'Gaegu',sans-serif;font-weight:700;font-size:15px;color:var(--muted);margin-top:8px;}
+  .sv-item.closed{opacity:.9;}
+  .sv-item.closed .meta{color:var(--tomato);}
+  .sv-empty{text-align:center;font-family:'Gaegu',sans-serif;font-weight:700;font-size:19px;color:var(--muted);margin-top:40px;line-height:1.8;}
+
+  .sv-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;}
+  .sv-q{
+    text-align:center;font-size:clamp(26px,4.6vw,40px);line-height:1.4;margin:6px 0 22px;
+  }
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;max-width:860px;margin:0 auto;}
+  .opt{
+    font-family:'Jua',sans-serif;color:var(--ink);background:var(--card);
+    border:4px solid var(--line);border-radius:24px;padding:26px 14px;cursor:pointer;
+    box-shadow:6px 6px 0 rgba(59,46,32,.16);text-align:center;touch-action:manipulation;
+  }
+  .opt:active{transform:translate(3px,3px);box-shadow:1px 1px 0 rgba(59,46,32,.16);}
+  .opt .em{font-size:clamp(56px,9vw,84px);display:block;line-height:1.15;}
+  .opt .nm{font-size:clamp(24px,4vw,34px);display:block;margin-top:8px;}
+  .opt:disabled{opacity:.6;}
+
+  #sv-thanks{
+    position:fixed;inset:0;z-index:50;background:rgba(255,246,234,.97);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  #sv-thanks .big{font-size:96px;animation:pop .5s;}
+  @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+  #sv-thanks .tx{font-size:32px;text-align:center;line-height:1.5;}
+
+  .graph-wrap{
+    background:var(--card);border:3px solid var(--line);border-radius:22px;
+    box-shadow:5px 5px 0 rgba(59,46,32,.15);padding:24px 14px 18px;max-width:860px;margin:0 auto;
+  }
+  .g-cols{display:flex;justify-content:center;align-items:flex-end;gap:clamp(14px,4vw,44px);min-height:300px;}
+  .g-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+  .g-stack{display:flex;flex-direction:column-reverse;gap:4px;}
+  .g-block{width:clamp(40px,7vw,58px);border-radius:8px;border:2.5px solid rgba(59,46,32,.55);animation:pop .35s;}
+  .g-crown{font-size:40px;margin-bottom:4px;animation:pop .5s;}
+  .g-foot{margin-top:10px;text-align:center;}
+  .g-foot .em{font-size:clamp(30px,5vw,42px);display:block;}
+  .g-foot .nm{font-size:clamp(16px,2.6vw,21px);display:block;margin-top:2px;}
+  .g-foot .ct{font-size:clamp(22px,3.6vw,30px);color:var(--tomato);display:block;margin-top:2px;}
+  .g-total{text-align:center;font-family:'Gaegu',sans-serif;font-weight:700;font-size:18px;color:var(--muted);margin-top:16px;}
+  .g-secret{text-align:center;font-size:26px;line-height:1.8;padding:50px 10px;}
+  .g-secret .em{font-size:70px;display:block;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<main>
+  <div id="sv-gate"><div class="sv-splash">📊<br>우리 반 조사 놀이</div></div>
+
+  <section id="sv-select" hidden>
+    <div class="sv-head"><h1>📊 우리 반 조사 놀이</h1><p class="sub">궁금한 걸 정하고, 친구들의 마음을 모아봐요!</p></div>
+    <div class="sv-list" id="sv-list"></div>
+    <div class="top" style="margin-top:22px"><a class="chip-btn" href="../index.html">← 꿈 놀이터</a></div>
+  </section>
+
+  <section id="sv-vote" hidden>
+    <div class="sv-bar">
+      <button class="chip-btn" id="vote-back">← 목록</button>
+      <button class="chip-btn" id="vote-graph">📊 그래프 보기</button>
+    </div>
+    <h2 class="sv-q" id="vote-q"></h2>
+    <div class="opts" id="vote-opts"></div>
+  </section>
+
+  <section id="sv-graph" hidden>
+    <div class="sv-bar">
+      <button class="chip-btn" id="graph-back">← 목록</button>
+      <button class="chip-btn" id="graph-vote">✋ 투표하러 가기</button>
+    </div>
+    <h2 class="sv-q" id="graph-q"></h2>
+    <div class="graph-wrap" id="graph-body"></div>
+  </section>
+</main>
+
+<div id="sv-thanks" hidden>
+  <div class="big">💚</div>
+  <div class="tx">고마워요!<br>다음 친구 부탁해요~</div>
+</div>
+
+<script src="../js/firebase-config.js"></script>
+<script type="module" src="../js/auth.js?v=sv1"></script>
+<script src="../js/survey-play.js?v=sv1"></script>
+</body>
+</html>
