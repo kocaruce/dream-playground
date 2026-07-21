@@ -133,7 +133,7 @@
     window.watchAuth((user) => {
       if (!user) {
         gateMsg(`🔒 로그인이 필요해요.<br>꿈 놀이터에서 로그인한 뒤 이용해 주세요.<br>
-          <a class="chip-btn" href="../index.html">꿈 놀이터에서 로그인하기</a>`);
+          <a class="chip-btn" href="../?login=1">꿈 놀이터에서 로그인하기</a>`);
         return;
       }
       renderSelect();

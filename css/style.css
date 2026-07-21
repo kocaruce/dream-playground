@@ -394,6 +394,13 @@ body.locked #hub-footer { display: none; }
 }
 .gate-inapp b { color: #5a3d00; }
 .gate-gis { display: flex; justify-content: center; min-height: 44px; }
+.gate-box { position: relative; }
+.gate-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; font-size: 17px; color: #9aab90;
+  cursor: pointer; padding: 4px 6px; line-height: 1;
+}
+.gate-close:hover { color: var(--ink); }
 .gate-link {
   display: block;
   width: 100%;

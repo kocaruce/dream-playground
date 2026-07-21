@@ -30,7 +30,7 @@
   function gateLoggedOut() {
     $("wq-gate").innerHTML =
       `<div class="wq-gate-msg">🔒 로그인이 필요해요.<br>꿈 놀이터에서 로그인한 뒤 이용해 주세요.<br>
-       <a class="btn btn-show" href="../index.html">꿈 놀이터에서 로그인하기</a></div>`;
+       <a class="btn btn-show" href="../?login=1">꿈 놀이터에서 로그인하기</a></div>`;
     showScreen("gate");
   }
 

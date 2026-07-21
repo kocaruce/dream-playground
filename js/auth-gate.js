@@ -1,5 +1,6 @@
-// 꿈 놀이터 로그인/가입 잠금 화면.
-// 흐름: 로그인/가입 → (처음이면) 프로필 입력 → 허브 열림.
+// 꿈 놀이터 로그인/가입 화면.
+// 홈은 로그인 없이 누구나 둘러볼 수 있고(검색 노출 포함), 로그인은 모달로 필요할 때만 연다.
+// 흐름: [로그인 버튼 · 놀이에서 ?login=1 유도] → 로그인/가입 모달 → (처음이면) 프로필 입력 → 허브.
 
 (function () {
   const body = document.body;
@@ -44,9 +45,8 @@
     return /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|DaumApps|everytimeApp|; wv\)/i.test(ua);
   }
 
-  // ── 로그인 / 가입 화면 ──
+  // ── 로그인 / 가입 모달 ──
   function showLogin() {
-    body.classList.add("locked");
     const isInApp = inAppBrowser();
     const googleBlock = isInApp
       ? `<div class="gate-inapp">📱 지금 앱 속 브라우저로 열려 있어요. <b>구글 로그인은 Chrome·Safari에서만</b> 돼요. 아래 <b>이메일</b>로 로그인하시거나, 오른쪽 위 메뉴에서 <b>다른 브라우저로 열기</b>를 눌러주세요.</div>
@@ -55,6 +55,7 @@
          <div class="gate-divider"><span>또는 이메일</span></div>`;
     const ov = showOverlay(`
       <div class="gate-box">
+        <button type="button" class="gate-close" id="gate-close" aria-label="닫기">✕</button>
         <div class="gate-brand"><span>🌈</span> 꿈 놀이터</div>
         <h2>선생님 로그인</h2>
         <p class="gate-sub">로그인하면 놀이 도구를 이용할 수 있어요.</p>
@@ -75,6 +76,7 @@
     const setErr = (m, ok) => { err.textContent = m; err.classList.toggle("gate-ok", !!ok); };
     const busy = (b) => ov.querySelectorAll("button,input").forEach(e => e.disabled = b);
 
+    ov.querySelector("#gate-close").onclick = hideOverlay;
     const gbtn = ov.querySelector("#google-btn");
     if (gbtn && window.renderGoogleButton) {
       window.renderGoogleButton(gbtn, (e) => setErr(googleErr(e)))
@@ -123,9 +125,8 @@
     return "가입에 실패했어요. 잠시 후 다시 시도해 주세요.";
   }
 
-  // ── 프로필 입력 화면 (처음 로그인 시) ──
+  // ── 프로필 입력 화면 (처음 로그인 시, 닫기 없음) ──
   function showProfile(user) {
-    body.classList.add("locked");
     const regionOpts = REGIONS.map(r => `<option value="${r}">${r}</option>`).join("");
     const ov = showOverlay(`
       <div class="gate-box">
@@ -182,24 +183,49 @@
     });
   }
 
+  // 로그아웃 상태의 헤더 칩: "로그인" 버튼
+  function setChipLoggedOut() {
+    const chip = document.getElementById("account-btn");
+    if (chip) {
+      chip.textContent = "로그인";
+      chip.title = "로그인";
+      chip.onclick = () => showLogin();
+    }
+  }
+
+  // ?login=1 · #login: 놀이 화면에서 유도된 경우 로그인 모달을 자동으로 연다 (한 번만)
+  function consumeLoginParam() {
+    const url = new URL(location.href);
+    const has = url.searchParams.has("login") || location.hash === "#login";
+    if (has) {
+      url.searchParams.delete("login");
+      url.hash = "";
+      history.replaceState(null, "", url.pathname + url.search);
+    }
+    return has;
+  }
+
   async function onUser(user) {
-    if (!user) { showLogin(); return; }
+    if (!user) {
+      setChipLoggedOut();
+      if (consumeLoginParam()) showLogin();
+      return;
+    }
     let profile = null;
     try { profile = await window.getProfile(user.uid); } catch (e) { /* 규칙 준비 전일 수 있음 */ }
+    consumeLoginParam();
     if (profile && profile.name) enterHub(profile, user);
     else showProfile(user);
   }
 
   function begin() {
-    if (!window.REQUIRE_LOGIN || !window.AUTH_ENABLED || !window.watchAuth) {
-      body.classList.remove("locked");
-      return;
-    }
-    // 로그인 확인 중엔 스플래시만 표시 (로그인창 깜박임 방지)
-    body.classList.add("locked");
-    showOverlay(`<div class="gate-splash"><span class="em">🌈</span><span class="tx">꿈 놀이터</span></div>`);
+    // 홈은 로그인 없이 공개 (검색엔진·처음 방문자도 콘텐츠를 볼 수 있게)
+    body.classList.remove("locked");
+    if (!window.REQUIRE_LOGIN || !window.AUTH_ENABLED || !window.watchAuth) return;
     window.watchAuth(onUser);
   }
+
+  window.openLogin = showLogin;
 
   if (window.AUTH_READY) begin();
   else window.addEventListener("auth-ready", begin, { once: true });
